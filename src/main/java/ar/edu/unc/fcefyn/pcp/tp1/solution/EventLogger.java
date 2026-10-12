@@ -10,8 +10,8 @@ import ar.edu.unc.fcefyn.pcp.tp1.api.OrderState;
 
 /**
  * Escribe eventos.csv.
- * No es thread-safe a proposito: solo lo llama SimulationMonitor con su lock tomado,
- * asi el orden de las filas coincide con el orden real de las transiciones.
+ * Hicimos que no sea Thread Safe a proposito ya que lo llama el Monitor con su Lock tomado. De esta forma 
+ * El orden de las filas coiniciden con el roden real.
  */
 public final class EventLogger {
 
@@ -32,12 +32,12 @@ public final class EventLogger {
 
     //Fila inicial de cada orden: ORDER_CREATED, sin fromState ni printer
     public void logCreation(Order order) throws IOException {
-        writeRow(order, Stage.INITIALIZATION, EventType.ORDER_CREATED, null, OrderState.CREATED);   // ← esta línea
+        writeRow(order, Stage.INITIALIZATION, EventType.ORDER_CREATED, null, OrderState.CREATED); 
     }
 
     //Fila de cada cambio de estado posterior
     public void logTransition(Order order, Stage stage, OrderState fromState, OrderState toState) throws IOException {
-        writeRow(order, stage, EventType.ORDER_STATE_CHANGED, fromState, toState);   // ← esta línea
+        writeRow(order, stage, EventType.ORDER_STATE_CHANGED, fromState, toState);  
     }
 
     public void close() throws IOException {
