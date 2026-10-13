@@ -34,6 +34,9 @@ public final class Order {
 
     //Etapa 1: CREATED -> WAITING_VALIDATION y guarda la impresora en el historial
     void assign(Printer printer) {
+            if (printer == null) {
+        throw new IllegalArgumentException("La impresora no puede ser null");
+        }
         if (assignedPrinter != null) {
             throw new IllegalStateException("La orden " + id + " ya fue asignada a " + assignedPrinter.getId());
         }

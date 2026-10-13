@@ -26,8 +26,17 @@ public final class EventLogger {
         this.startNanos = startNanos;
         Files.createDirectories(outputDirectory);
         this.writer = Files.newBufferedWriter(outputDirectory.resolve("eventos.csv"), StandardCharsets.UTF_8);
+        try {
         writer.write(HEADER);
         writer.newLine();
+    } catch (IOException error) {
+        try {
+            writer.close();
+        } catch (IOException closeError) {
+            error.addSuppressed(closeError);
+        }
+        throw error;
+        }
     }
 
     //Fila inicial de cada orden: ORDER_CREATED, sin fromState ni printer

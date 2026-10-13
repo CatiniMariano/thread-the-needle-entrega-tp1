@@ -83,56 +83,92 @@ public final class SimulationMonitor {
 
     //Espera una impresora libre. Devuelve false si se cancelo
     public synchronized boolean assignPrinter(Order order) throws InterruptedException {
-        Printer printer = findAvailablePrinter();
-        while (printer == null && !cancelled) {
-            if (!hasOperationalPrinter()) {
-                cancel(new IllegalStateException("No quedan impresoras operativas"));
-                break;
-            }
-            wait();
-            printer = findAvailablePrinter();
-        }
-        if (cancelled) {
-            return false;
-        }
+    if (cancelled) {
+        return false;
+    }
+    if (order == null) {
+        throw new IllegalArgumentException("La orden no puede ser null");
+    }
+    if (order.getState() != OrderState.CREATED
+            || order.getAssignedPrinter() != null) {
+        throw new IllegalStateException(
+                "La orden " + order.getId() + " no esta pendiente de asignacion");
+    }
 
-        printer.reserve(order);
-        order.assign(printer);
-        log(order, Stage.ASSIGNMENT, OrderState.CREATED, OrderState.WAITING_VALIDATION);
+    Printer printer = findAvailablePrinter();
+    while (printer == null && !cancelled) {
+        wait();
+        printer = findAvailablePrinter();
+    }
+    if (cancelled) {
+        return false;
+    }
 
-        validationQueue.addLast(order);
-        notifyAll();
-        return true;
+    // wait() libera el monitor: revalidar antes de modificar las entidades.
+    if (order.getState() != OrderState.CREATED
+            || order.getAssignedPrinter() != null) {
+        throw new IllegalStateException(
+                "La orden " + order.getId() + " no esta pendiente de asignacion");
+    }
+
+    printer.reserve(order);
+    order.assign(printer);
+    log(order, Stage.ASSIGNMENT, OrderState.CREATED, OrderState.WAITING_VALIDATION);
+
+    validationQueue.addLast(order);
+    notifyAll();
+    return true;
     }
 
     public synchronized void completeValidation(Order order, boolean valid) {
-        if (cancelled) {
-            return;
-        }
-        Printer printer = order.getAssignedPrinter();
-        order.finishValidation(valid);
+    if (cancelled) {
+        return;
+    }
+    if (order == null) {
+        throw new IllegalArgumentException("La orden no puede ser null");
+    }
 
-        OrderState to;
-        if (valid) {
-            to = OrderState.READY_TO_PRINT;
-        } else {
-            to = OrderState.REJECTED;
-            printer.release(order);
-            processedOrders++;
-        }
-        log(order, Stage.VALIDATION, OrderState.WAITING_VALIDATION, to);
+    Printer printer = order.getAssignedPrinter();
+    if (printer == null
+            || printer.getState() != PrinterState.RESERVED
+            || printer.getAssignedOrder() != order) {
+        throw new IllegalStateException(
+                "La orden " + order.getId() + " no tiene una reserva valida");
+    }
 
-        if (valid) {
-            printingQueue.addLast(order);
-        }
-        notifyAll();
+    order.finishValidation(valid);
+
+    OrderState to;
+    if (valid) {
+        to = OrderState.READY_TO_PRINT;
+    } else {
+        to = OrderState.REJECTED;
+        printer.release(order);
+        processedOrders++;
+    }
+    log(order, Stage.VALIDATION, OrderState.WAITING_VALIDATION, to);
+
+    if (valid) {
+        printingQueue.addLast(order);
+    }
+    notifyAll();
     }
 
     public synchronized void completePrinting(Order order, boolean successful) {
         if (cancelled) {
             return;
         }
+        if (order == null) {
+        throw new IllegalArgumentException("La orden no puede ser null");
+    }
+
         Printer printer = order.getAssignedPrinter();
+        if (printer == null
+            || printer.getState() != PrinterState.RESERVED
+            || printer.getAssignedOrder() != order) {
+        throw new IllegalStateException(
+                "La orden " + order.getId() + " no tiene una reserva valida");
+        }
         order.finishPrinting(successful);
 
         OrderState to;
@@ -175,6 +211,13 @@ public final class SimulationMonitor {
     public synchronized void awaitCompletion() throws InterruptedException {
         while (processedOrders < config.totalOrders() && !cancelled) {
             wait();
+        }
+        if (!cancelled && (!assignmentQueue.isEmpty()
+            || !validationQueue.isEmpty()
+            || !printingQueue.isEmpty()
+            || !qualityControlQueue.isEmpty())) {
+        cancel(new IllegalStateException(
+                "La simulacion termino con ordenes en las colas"));
         }
     }
 

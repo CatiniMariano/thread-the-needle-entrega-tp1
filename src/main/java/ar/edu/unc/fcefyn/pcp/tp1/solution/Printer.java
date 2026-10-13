@@ -35,6 +35,9 @@ public final class Printer {
 
     //AVAILABLE -> RESERVED
     void reserve(Order order) {
+        if (order == null) {
+            throw new IllegalArgumentException("La orden no puede ser null");
+        }
         if (state != PrinterState.AVAILABLE) {
             throw new IllegalStateException("La impresora " + id + " no esta disponible: su estado es " + state);
         }
