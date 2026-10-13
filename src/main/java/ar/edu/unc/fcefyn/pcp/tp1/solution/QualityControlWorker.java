@@ -18,7 +18,7 @@ public final class QualityControlWorker implements Runnable {
     public void run() {
         try {
             while (true) {
-                // Espera dentro del monitor (wait) hasta que haya una orden en PRINTED.
+                // Espera dentro del monitor (wait) hasta que haya una orden en PRINTED
                 Order order = monitor.takeForQualityControl();             
                   if (order == null) {
                     return; 
@@ -27,7 +27,7 @@ public final class QualityControlWorker implements Runnable {
 
                 sleep(config.qualityControlDelayMillis());
 
-                // Función determinista, no toca estado compartido y no necesita lock.
+                // Función determinista, no necesita lock.
                 boolean approved = OutcomeDecider.isQualityApproved(order.getId(), config);
 
             monitor.completeQualityControl(order, approved);
@@ -41,7 +41,6 @@ public final class QualityControlWorker implements Runnable {
         }
     }
 
-    // Solo se duerme si la demora es mayor que cero (hay configuraciones con demora nula).
     private static void sleep(long millis) throws InterruptedException {
         if (millis > 0) {
             Thread.sleep(millis);

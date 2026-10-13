@@ -4,6 +4,7 @@ import ar.edu.unc.fcefyn.pcp.tp1.api.OutcomeDecider;
 import ar.edu.unc.fcefyn.pcp.tp1.api.SimulationConfig;
 import ar.edu.unc.fcefyn.pcp.tp1.solution.model.Order;
 
+
 public final class PrintingWorker implements Runnable {
 
     private final SimulationMonitor monitor;
@@ -18,7 +19,7 @@ public final class PrintingWorker implements Runnable {
     public void run() {
         try {
             while (true) {
-                // Espera dentro del monitor (wait) hasta que haya una orden en READY_TO_PRINT.
+      // Espera dentro del monitor (wait) hasta que haya una orden en READY_TO_PRINT
                 Order order = monitor.takeForPrinting();             
                   if (order == null) {
                     return; 
@@ -27,7 +28,7 @@ public final class PrintingWorker implements Runnable {
 
                 sleep(config.printingDelayMillis());
 
-                // Función determinista, no toca estado compartido y no necesita lock.
+                // Funcion determinista, no toca estado compartido y no necesita lock
                 boolean successful = OutcomeDecider.isPrintSuccessful(order.getId(), config);
 
             monitor.completePrinting(order, successful);
@@ -41,7 +42,7 @@ public final class PrintingWorker implements Runnable {
         }
     }
 
-    // Solo se duerme si la demora es mayor que cero (hay configuraciones con demora nula).
+    // Solo se duerme si la demora es mayor que cero 
     private static void sleep(long millis) throws InterruptedException {
         if (millis > 0) {
             Thread.sleep(millis);
