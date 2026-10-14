@@ -2,16 +2,15 @@ package ar.edu.unc.fcefyn.pcp.tp1.solution;
 
 import ar.edu.unc.fcefyn.pcp.tp1.api.OutcomeDecider;
 import ar.edu.unc.fcefyn.pcp.tp1.api.SimulationConfig;
-import ar.edu.unc.fcefyn.pcp.tp1.solution.model.Order;
 
 public final class ValidationWorker implements Runnable {
 
     private final SimulationMonitor monitor;
-    private final SimulationConfig config;
+    private final SimulationConfig simulationConfig;
 
-    public ValidationWorker(SimulationMonitor monitor, SimulationConfig config) {
+    public ValidationWorker(SimulationMonitor monitor, SimulationConfig simulationConfig) {
         this.monitor = monitor;
-        this.config = config;
+        this.simulationConfig = simulationConfig;
     }
 
     @Override
@@ -25,15 +24,15 @@ public final class ValidationWorker implements Runnable {
                 }
 
 
-                sleep(config.validationDelayMillis());
+                Thread.sleep(simulationConfig.validationDelayMillis());
 
                 // Funcion determinista, no necesita lock
-                boolean valid = OutcomeDecider.isModelValid(order.getId(), config);
+                boolean isValid = OutcomeDecider.isModelValid(order.getId(), simulationConfig);
 
-                monitor.completeValidation(order, valid);
+                monitor.completeValidation(order, isValid);
             }
             } catch (InterruptedException e) {
-            
+            monitor.cancel(e);  
             Thread.currentThread().interrupt();
         } catch (RuntimeException error) {
             

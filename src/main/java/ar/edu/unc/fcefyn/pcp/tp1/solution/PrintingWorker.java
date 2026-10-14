@@ -2,8 +2,6 @@ package ar.edu.unc.fcefyn.pcp.tp1.solution;
 
 import ar.edu.unc.fcefyn.pcp.tp1.api.OutcomeDecider;
 import ar.edu.unc.fcefyn.pcp.tp1.api.SimulationConfig;
-import ar.edu.unc.fcefyn.pcp.tp1.solution.model.Order;
-
 
 public final class PrintingWorker implements Runnable {
 
@@ -34,7 +32,7 @@ public final class PrintingWorker implements Runnable {
             monitor.completePrinting(order, successful);
             }
             } catch (InterruptedException e) {
-            
+            monitor.cancel(e);
             Thread.currentThread().interrupt();
         } catch (RuntimeException error) {
             

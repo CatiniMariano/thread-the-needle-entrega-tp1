@@ -1,7 +1,7 @@
 package ar.edu.unc.fcefyn.pcp.tp1.solution;
 
 import ar.edu.unc.fcefyn.pcp.tp1.api.SimulationConfig;
-import ar.edu.unc.fcefyn.pcp.tp1.solution.model.Order;
+
 
 public final class AssignmentWorker implements Runnable {
 
@@ -33,9 +33,10 @@ public final class AssignmentWorker implements Runnable {
                     return;
                 }
             }
-        } catch (InterruptedException | RuntimeException error) {
-            // Si nos interrumpen le avisamos al monitor para
-            // que despierte a todos y nadie quede en wait() para siempre
+        } catch (InterruptedException error) {
+            monitor.cancel(error);
+            Thread.currentThread().interrupt();
+        } catch (RuntimeException error) {            
             monitor.cancel(error);
         }
     }

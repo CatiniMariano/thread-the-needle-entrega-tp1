@@ -2,7 +2,6 @@ package ar.edu.unc.fcefyn.pcp.tp1.solution;
 
 import ar.edu.unc.fcefyn.pcp.tp1.api.OutcomeDecider;
 import ar.edu.unc.fcefyn.pcp.tp1.api.SimulationConfig;
-import ar.edu.unc.fcefyn.pcp.tp1.solution.model.Order;
 
 public final class QualityControlWorker implements Runnable {
 
@@ -33,7 +32,7 @@ public final class QualityControlWorker implements Runnable {
             monitor.completeQualityControl(order, approved);
             }
             } catch (InterruptedException e) {
-            
+            monitor.cancel(e);
             Thread.currentThread().interrupt();
         } catch (RuntimeException error) {
             
