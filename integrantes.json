@@ -20,7 +20,13 @@
     {
       "nombre": "Vallenari, Tizziano",
       "documento": "46554045",
+      "usuarioGit": "https://github.com/tizzianovallenari-del"
+    },
+    {
+      "nombre": "Cheble, José Francisco",
+      "documento": "35738401",
       "usuarioGit": ""
+
     }
   ]
 }
